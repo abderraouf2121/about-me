@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Aberraouf — Web Developer</title>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --bg2: #111111;
+      --bg3: #161616;
+      --border: #1e1e1e;
+      --green: #39ff14;
+      --green-dim: #1a7a05;
+      --green-glow: rgba(57,255,20,0.08);
+      --amber: #f0a500;
+      --text: #c8c8c8;
+      --text-dim: #555;
+      --text-mid: #888;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Space Grotesk', sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 14px;
+      line-height: 1.7;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px,
+        transparent 3px,
+        rgba(0,0,0,0.08) 3px,
+        rgba(0,0,0,0.08) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
+
+    /* Layout */
+    .shell {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 24px;
+    }
+
+    /* ─── NAV ─── */
+    nav {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(13,13,13,0.92);
+      backdrop-filter: blur(6px);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 0;
+    }
+
+    nav .shell {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+    }
+
+    .nav-prompt {
+      color: var(--green);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 24px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--text-mid);
+      text-decoration: none;
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--green); }
+
+    /* ─── HERO ─── */
+    #hero {
+      padding: 100px 0 80px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-eyebrow {
+      color: var(--green);
+      font-size: 12px;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+    }
+
+    .hero-name {
+      font-family: var(--mono);
+      font-size: clamp(36px, 6vw, 64px);
+      font-weight: 700;
+      color: #fff;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    .hero-name .cursor {
+      display: inline-block;
+      width: 3px;
+      height: 0.85em;
+      background: var(--green);
+      margin-left: 4px;
+      vertical-align: middle;
+      animation: blink 1.1s step-end infinite;
+    }
+
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .hero-subtitle {
+      margin-top: 20px;
+      font-family: var(--sans);
+      font-size: 16px;
+      font-weight: 300;
+      color: var(--text-mid);
+      max-width: 540px;
+    }
+
+    .hero-subtitle em {
+      color: var(--amber);
+      font-style: normal;
+    }
+
+    .hero-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 32px;
+    }
+
+    .tag {
+      font-size: 11px;
+      letter-spacing: 0.1em;
+      padding: 4px 10px;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      border-radius: 2px;
+    }
+
+    .tag.active {
+      border-color: var(--green-dim);
+      color: var(--green);
+      background: var(--green-glow);
+    }
+
+    /* ─── SECTION BASE ─── */
+    section {
+      padding: 72px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 12px;
+      margin-bottom: 40px;
+    }
+
+    .section-num {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+    }
+
+    .section-title {
+      font-size: 11px;
+      letter-spacing: 0.15em;
+      color: var(--green);
+      text-transform: uppercase;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ─── ABOUT ─── */
+    .terminal-block {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .terminal-bar {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg3);
+    }
+
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+
+    .terminal-title {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-left: 8px;
+      letter-spacing: 0.06em;
+    }
+
+    .terminal-body {
+      padding: 24px 20px;
+    }
+
+    .t-line {
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+
+    .t-prompt { color: var(--green); }
+    .t-cmd { color: #fff; }
+    .t-comment { color: var(--text-dim); }
+    .t-output { color: var(--text); padding-left: 16px; }
+    .t-key { color: var(--amber); }
+    .t-val { color: #79b8ff; }
+    .t-string { color: #9ecbff; }
+
+    /* ─── SKILLS ─── */
+    .skills-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+    }
+
+    .skill-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 20px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .skill-card:hover {
+      border-color: var(--green-dim);
+      background: var(--bg3);
+    }
+
+    .skill-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .skill-icon {
+      font-size: 18px;
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+    }
+
+    .skill-name {
+      font-size: 13px;
+      font-weight: 700;
+      color: #fff;
+      letter-spacing: 0.04em;
+    }
+
+    .skill-level-label {
+      font-size: 10px;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin-bottom: 10px;
+    }
+
+    .skill-bar-track {
+      height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .skill-bar-fill {
+      height: 100%;
+      background: var(--green);
+      border-radius: 2px;
+      transform-origin: left;
+      animation: bar-grow 1.2s cubic-bezier(.22,1,.36,1) both;
+      animation-play-state: paused;
+    }
+
+    .skill-bar-fill.animate { animation-play-state: running; }
+
+    @keyframes bar-grow {
+      from { transform: scaleX(0); }
+      to { transform: scaleX(1); }
+    }
+
+    .skill-desc {
+      margin-top: 10px;
+      font-size: 11px;
+      color: var(--text-mid);
+      line-height: 1.6;
+      font-family: var(--sans);
+    }
+
+    .skill-honest {
+      display: inline-block;
+      margin-top: 8px;
+      font-size: 10px;
+      letter-spacing: 0.08em;
+      padding: 2px 6px;
+      background: rgba(240,165,0,0.08);
+      border: 1px solid rgba(240,165,0,0.2);
+      color: var(--amber);
+      border-radius: 2px;
+    }
+
+    /* ─── CONTACT ─── */
+    .contact-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    @media (max-width: 560px) {
+      .contact-grid { grid-template-columns: 1fr; }
+    }
+
+    .contact-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      transition: border-color 0.2s, background 0.2s;
+    }
+
+    .contact-card:hover {
+      border-color: var(--green-dim);
+      background: var(--bg3);
+    }
+
+    .contact-icon {
+      font-size: 22px;
+      width: 42px;
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      flex-shrink: 0;
+    }
+
+    .contact-label {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .contact-value {
+      font-size: 13px;
+      color: #fff;
+      margin-top: 2px;
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      padding: 32px 0;
+      text-align: center;
+    }
+
+    .footer-text {
+      font-size: 11px;
+      color: var(--text-dim);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-text span { color: var(--green); }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 600px) {
+      nav .shell { flex-wrap: wrap; }
+      .nav-links { gap: 14px; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="shell">
+    <span class="nav-prompt">aberraouf@dev:~$<span style="animation:blink 1.1s step-end infinite;display:inline-block;width:7px;height:12px;background:var(--green);vertical-align:middle;margin-left:4px;"></span></span>
+    <ul class="nav-links">
+      <li><a href="#about">./about</a></li>
+      <li><a href="#skills">./skills</a></li>
+      <li><a href="#contact">./contact</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="shell">
+    <div class="hero-eyebrow">// hello world</div>
+    <h1 class="hero-name">Aberraouf<span class="cursor"></span></h1>
+    <p class="hero-subtitle">
+      I build things for the web. Currently <em>mastering the fundamentals</em> —
+      HTML &amp; CSS done right, no shortcuts.
+    </p>
+    <div class="hero-tags">
+      <span class="tag active">HTML5</span>
+      <span class="tag active">CSS3</span>
+      <span class="tag">JavaScript — learning</span>
+      <span class="tag">Based in Algeria</span>
+      <span class="tag">Open to work</span>
+    </div>
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about">
+  <div class="shell">
+    <div class="section-header">
+      <span class="section-num">01</span>
+      <span class="section-title">about</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="terminal-block">
+      <div class="terminal-bar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <span class="terminal-title">about.json</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">cat about.json</span></div>
+        <div class="t-line t-comment" style="margin-bottom:14px;">// output:</div>
+        <div class="t-line t-output"><span class="t-key">"name"</span>: <span class="t-string">"Aberraouf"</span>,</div>
+        <div class="t-line t-output"><span class="t-key">"role"</span>: <span class="t-string">"Frontend Developer (in progress)"</span>,</div>
+        <div class="t-line t-output"><span class="t-key">"location"</span>: <span class="t-string">"Algeria 🇩🇿"</span>,</div>
+        <div class="t-line t-output"><span class="t-key">"philosophy"</span>: <span class="t-string">"I won't call myself a video editor just because I can trim and add transitions. I build honest skills."</span>,</div>
+        <div class="t-line t-output"><span class="t-key">"current_focus"</span>: <span class="t-string">"HTML &amp; CSS — solid, semantic, accessible"</span>,</div>
+        <div class="t-line t-output"><span class="t-key">"next_up"</span>: <span class="t-val">["JavaScript", "responsive layouts", "web accessibility"]</span>,</div>
+        <div class="t-line t-output"><span class="t-key">"open_to"</span>: <span class="t-val">["freelance", "junior roles", "collaborations"]</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <div class="shell">
+    <div class="section-header">
+      <span class="section-num">02</span>
+      <span class="section-title">skills</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="skills-grid">
+
+      <div class="skill-card">
+        <div class="skill-card-header">
+          <div class="skill-icon">⬜</div>
+          <span class="skill-name">HTML5</span>
+        </div>
+        <div class="skill-level-label">PROFICIENCY — MASTERED</div>
+        <div class="skill-bar-track">
+          <div class="skill-bar-fill" style="width:90%"></div>
+        </div>
+        <p class="skill-desc">Semantic markup, document structure, forms, accessibility basics. Writing clean HTML that makes sense without any styling.</p>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-card-header">
+          <div class="skill-icon">🎨</div>
+          <span class="skill-name">CSS3</span>
+        </div>
+        <div class="skill-level-label">PROFICIENCY — MASTERED</div>
+        <div class="skill-bar-track">
+          <div class="skill-bar-fill" style="width:85%"></div>
+        </div>
+        <p class="skill-desc">Flexbox, Grid, animations, custom properties, responsive design. Turning designs into pixel-perfect interfaces.</p>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-card-header">
+          <div class="skill-icon">⚡</div>
+          <span class="skill-name">JavaScript</span>
+        </div>
+        <div class="skill-level-label">PROFICIENCY — LEARNING</div>
+        <div class="skill-bar-track">
+          <div class="skill-bar-fill" style="width:15%"></div>
+        </div>
+        <p class="skill-desc">Currently picking it up. Variables, DOM basics, events. Honest progress.</p>
+        <span class="skill-honest">in progress</span>
+      </div>
+
+      <div class="skill-card">
+        <div class="skill-card-header">
+          <div class="skill-icon">🧠</div>
+          <span class="skill-name">Problem Solving</span>
+        </div>
+        <div class="skill-level-label">PROFICIENCY — SOLID</div>
+        <div class="skill-bar-track">
+          <div class="skill-bar-fill" style="width:75%"></div>
+        </div>
+        <p class="skill-desc">Breaking down a layout and figuring out how to build it. Reading docs, debugging, trying again.</p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact">
+  <div class="shell">
+    <div class="section-header">
+      <span class="section-num">03</span>
+      <span class="section-title">contact</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="terminal-block" style="margin-bottom:28px;">
+      <div class="terminal-bar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <span class="terminal-title">bash</span>
+      </div>
+      <div class="terminal-body">
+        <div class="t-line"><span class="t-prompt">$ </span><span class="t-cmd">echo "Want to work together? Let's talk."</span></div>
+        <div class="t-line t-output" style="color:var(--green);">Want to work together? Let's talk.</div>
+      </div>
+    </div>
+
+    <div class="contact-grid">
+      <a class="contact-card" href="mailto:belaoude60@gmail.com">
+        <div class="contact-icon">📧</div>
+        <div>
+          <div class="contact-label">email</div>
+          <div class="contact-value">belaoude60@gmail.com</div>
+        </div>
+      </a>
+      <a class="contact-card" href="https://github.com/" target="_blank">
+        <div class="contact-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" style="color:#fff"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.3 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 21.795 24 17.295 24 12c0-6.63-5.37-12-12-12"/></svg>
+        </div>
+        <div>
+          <div class="contact-label">github</div>
+          <div class="contact-value">github.com/aberraouf</div>
+        </div>
+      </a>
+    </div>
+
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="shell">
+    <p class="footer-text">built with <span>HTML &amp; CSS</span> — no frameworks, no shortcuts.</p>
+  </div>
+</footer>
+
+<!-- Animate skill bars on scroll -->
+<script>
+  const bars = document.querySelectorAll('.skill-bar-fill');
+  const io = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('animate');
+        io.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.3 });
+  bars.forEach(b => io.observe(b));
+</script>
+
+</body>
+</html>
